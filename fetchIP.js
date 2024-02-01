@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import handleLogin from "../Scrape/LoginNode.js";
+//import handleLoginWithIP from "../Scrape/LoginNode.js";
+import { handleLoginWithIP, handleLogin } from '../Scrape/ConnectNode.js';
+
 
 
 const SearchComponentIP = () => {
@@ -85,7 +87,7 @@ const SearchComponentIP = () => {
         try {
             // Bắt đầu quá trình kết nối bằng cách đặt isLoading thành true
             setIsLoading(true);
-            const LoginContent = await handleLogin(searchValue);
+            const LoginContent = await handleLoginWithIP(searchValue);
             setContent(LoginContent);
         } catch (error) {
             console.error(error);
