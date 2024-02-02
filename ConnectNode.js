@@ -1,40 +1,28 @@
 
-// // Sử dụng biểu thức chính quy để lọc IP
-// const regex = /\b10(?:\.\d{1,3}){3}\b/g;
-// const matches = searchValue.match(regex);
 
-// // Lấy kết quả IP
-// const IP = matches ? matches[0] : null;
-// if (IP) {
-//   // Nếu có IP, cập nhật nội dung với định dạng HTML
-//   setContentCallback(`<h3>${IP}</h3>`);
-// } else {
-//   // Nếu không có IP, thay đổi nội dung sang đoạn văn bản khác
-//   setContentCallback("<p>IP not found.</p>");
-// }
+const handleLoginWithIP = async (searchValue, setIsLoading, setContentCallback) => {
+  setIsLoading(true); // Bắt đầu quá trình kết nối
 
-const setContentCallback = (content) => {
-  // Định nghĩa logic cho setContentCallback
-};
+  try {
+    const regex = /\b192(?:\.\d{1,3}){3}\b/g;
+    const matches = searchValue.match(regex);
 
-const handleLoginWithIP = (searchValue) => {
-  const regex = /\b10(?:\.\d{1,3}){3}\b/g;
-  const matches = searchValue.match(regex);
-
-  // Lấy kết quả IP
-  const IP = matches ? matches[0] : null;
-  if (IP) {
-    // Nếu có IP, cập nhật nội dung với định dạng HTML
-    setContentCallback(`<h3>${IP}</h3>`);
-    // Gọi handleLogin với IP đã lọc
-    handleLogin(IP);
-  } else {
-    // Nếu không có IP, thay đổi nội dung sang đoạn văn bản khác
-    setContentCallback("<p>IP not found.</p>");
+    // Lấy kết quả IP
+    const IP = matches ? matches[0] : null;
+    if (IP) {
+      setContentCallback(`<h3>${IP}</h3>`);
+      await handleLogin(IP, setIsLoading);
+    } else {
+      setContentCallback("<p>IP not found.</p>");
+      setIsLoading(false); // Kết thúc quá trình kết nối với trạng thái lỗi
+    }
+  } catch (error) {
+    console.error(error);
+    setIsLoading(false); // Kết thúc quá trình kết nối với trạng thái lỗi
   }
 };
 
-const handleLogin = async (IP) => {
+const handleLogin = async (IP, setIsLoading) => {
   try {
     console.log('IP view', IP);
     // Gọi API với phương thức POST
@@ -65,15 +53,14 @@ const handleLogin = async (IP) => {
       const loginResultElement = document.getElementById('loginResult');
       loginResultElement.textContent = `Connected to: ${pageTitle} | nodeBText: ${nodeBText}`;
 
-
-      // Thực hiện các hành động khác với pageTitle nếu cần
+      setIsLoading(false); // Kết thúc quá trình kết nối thành công
     } else {
-      // Xử lý lỗi hoặc hiển thị thông báo lỗi
       console.error('API request failed');
+      setIsLoading(false); // Kết thúc quá trình kết nối với trạng thái lỗi
     }
   } catch (error) {
-    // Xử lý lỗi nếu có
     console.error('Error:', error);
+    setIsLoading(false); // Kết thúc quá trình kết nối với trạng thái lỗi
   }
 };
 
