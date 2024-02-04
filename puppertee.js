@@ -1,4 +1,4 @@
-//'use strict';
+
 const Koa = require('koa');
 const bodyParser = require('koa-bodyparser');
 const cors = require('@koa/cors');
@@ -35,8 +35,6 @@ const crawlData = async (ctx) => {
 
             console.log(`https://${searchValue}`);
 
-
-            console.log('isFirstRequest 0a: ', isFirstRequest);
             //await page.goto(`https://${searchValue}`);
 
             //const pageTitle = await page.title();
@@ -45,9 +43,6 @@ const crawlData = async (ctx) => {
             const xpathTile = '/html/body/section[2]/nav/ul/li[5]/a';
             const xpathExpression = '/html/body/section[5]/div/div/div/div/div/div/ul/li[1]/h3/a';
 
-            // const xpathTile = '//*[@id="copyright"]';
-            // const xpathExpression = '//*[@id="logo"]';
-
             // Send a JSON response using ctx.send
             await page.waitForXPath(xpathTile);
             const [element2] = await page.$x(xpathTile);
@@ -55,10 +50,10 @@ const crawlData = async (ctx) => {
             console.log('Gia trị xPath: ', subTitle);
 
             const [element] = await page.$x(xpathExpression);
-            let nodeBText;
+            //let nodeBText;
 
             if (element) {
-                nodeBText = await page.evaluate(el => el.textContent, element);
+                let nodeBText = await page.evaluate(el => el.textContent, element);
             } else {
                 console.error('Element not found with the given XPath');
                 ctx.status = 404; // Set HTTP status code to 404
@@ -83,57 +78,59 @@ const crawlData = async (ctx) => {
         }
         //scraping
         // Lắng nghe cho yêu cầu với listenXPath từ client
-        // Nếu đây là lần gọi yêu cầu POST đầu tiên, thực hiện lắng nghe cho listenXPath
+        // Nếu đây là lần gọi yêu cầu POST đầu tiên, thực hiện lắng nghe cho listenXPath    
         console.log('isFirstRequest 2: ', isFirstRequest);
+
         if (!isFirstRequest) {
-            const listenXPath = await new Promise((resolve) => {
-                console.log('isFirstRequest 3: ', isFirstRequest);
-                const listenXPath = ctx.request.body.listenXPath;
-                console.log('listenXPath: ', listenXPath);
-                resolve(listenXPath);
-                console.log('isFirstRequest 3a: ', isFirstRequest);
-                //isFirstRequest = false;
-            });
-            console.log('isFirstRequest 4: ', isFirstRequest);
-            await page.waitForXPath(listenXPath);
-            const [valueXpath] = await page.$x(listenXPath);
+            let listenXPath;
+            try {
+                listenXPath = await new Promise((resolve) => {
+                    console.log('isFirstRequest 3: ', isFirstRequest);
+                    const listenXPath = ctx.request.body.listenXPath;
+                    console.log('listenXPath: ', listenXPath);
+                    resolve(listenXPath);
+                });
 
-            let resultOut;
+                console.log('isFirstRequest 4: ', isFirstRequest);
+                await page.waitForXPath(listenXPath);
+                const [valueXpath] = await page.$x(listenXPath);
 
-            if (valueXpath) {
-                //let responseData = {};
-                resultOut = await page.evaluate(el => el.textContent, valueXpath);
-                // Thêm kết quả scrape vào object response và gửi cho client
-                // ctx.body = {
-                //     ...responseData,
-                //     resultScrape: resultOut,
-                // };
-                // console.log('resultScrape', resultOut);
+                if (valueXpath) {
+                    let resultOut = await page.evaluate(el => el.textContent, valueXpath);
+                    const responseData = {
+                        resultScrape: resultOut,
+                    };
+                    ctx.body = responseData;
+                } else {
+                    ctx.status = 404;
+                    ctx.body = {
+                        error: 'Element not found with the given XPath',
+                    };
+                    isFirstRequest = true;
+                    await browser.close();
+                    return;
+                }
 
-                const responseData = {
-                    //nodeB: nodeBText,
-                    resultScrape: resultOut,
-                };
-                ctx.body = responseData;
-
-
-            } else {
-                ctx.status = 404;
-                ctx.body = {
-                    error: 'Element not found with the given XPath',
-                };
-                await browser.close();
+            } catch (error) {
+                console.error('Error:', error);
+                isFirstRequest = true;
+                listenXPath = undefined; // Đặt lại listenXPath thành undefined nếu có lỗi
                 return;
             }
+
         }
         console.log('isFirstRequest 5: ', isFirstRequest);
         isFirstRequest = false; // Đặt cờ thành false sau lần gọi đầu tiên
+        console.log('isFirstRequest 5a: ', isFirstRequest);
     } catch (error) {
         console.error('Error:', error);
         ctx.status = 500; // Set HTTP status code to 500
         ctx.body = {
             error: 'An error occurred during crawling.',
         };
+        console.log('isFirstRequest 6: ', isFirstRequest);
+        isFirstRequest = true;
+        await browser.close();
     }
 };
 
