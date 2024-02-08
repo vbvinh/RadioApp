@@ -12,6 +12,26 @@ const SearchComponentSrape = () => {
     const [opacity, setOpacity] = useState(true);
     const [data, setData] = useState([]); // State để lưu trữ dữ liệu từ API
 
+
+    const idNameMapping = {
+        1: "one",
+        2: "two",
+        4: "four",
+        5: "fine",
+        7: "seven",
+        8: "eight",
+        9: "nine",
+    };
+
+    const getNameFromId = (id) => {
+        return idNameMapping[id] || "Will_define";
+    };
+
+    const getIdFromName = (name) => {
+        const id = Object.keys(idNameMapping).find(key => idNameMapping[key] === name);
+        return id ? parseInt(id) : null;
+    };
+
     useEffect(() => {
         fetchDataAndDisplay();
     }, []);
@@ -81,7 +101,7 @@ const SearchComponentSrape = () => {
                     <ul className="list-unstyled">
                         {React.Children.toArray(children).filter(
                             (child) =>
-                                !value || child.props.children.toLowerCase().startsWith(value),
+                                !value || child.props.children.toLowerCase().includes(value.toLowerCase()),
                         )}
                     </ul>
                 </div>
@@ -112,12 +132,15 @@ const SearchComponentSrape = () => {
 
                 <Dropdown.Menu as={CustomMenu}>
                     {data.map((item) => (
-                        <Dropdown.Item key={item.id} onClick={() => handleItemClick(item.id)}>
-                            {item.id}
+                        // <Dropdown.Item key={item.id} onClick={() => handleItemClick(item.id)}>
+                        //     {item.id}
+
+                        <Dropdown.Item key={item.id} eventKey={item.id} onClick={() => handleItemClick(item.id)}>
+                            {getNameFromId(item.id)}
+
                         </Dropdown.Item>
                     ))}
                 </Dropdown.Menu>
-
             </Dropdown>
 
             {/* Hiển thị nội dung trang web */}
