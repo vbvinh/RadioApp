@@ -38,7 +38,7 @@
 //         console.error('Error:', error);
 //     }
 // };
-
+// export default handleScrape;
 //let selectedId;
 async function fetchDataForSelectedId(id) {
     try {
@@ -120,4 +120,4 @@ async function handleScrapeContent(selectedId) {
 export { handleScrapeContent };
 
 
-export default handleScrape;
+
