@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { handleScrapeContent } from '../Scrape/Scraping.js';
+import { ScrapeResultTable, handleScrapeContent } from '../Scrape/Scraping.js';
+//import { ScrapeResultTable } from '../Scrape/Scraping.js';
 import Dropdown from 'react-bootstrap/Dropdown';
 import Form from 'react-bootstrap/Form';
-
-const SearchComponentSrape = () => {
+ 
+const SearchComponentSrape = ({ setResultOutArray })  => {
     const [searchValue, setSearchValue] = useState('');
     const [selectedId, setSelectedId] = useState(null); // State để lưu trữ ID đã chọn
+    //const [resultOutArray, setResultOutArray] = useState(null); 
     const [isDisconnect, setIsDisconnect] = useState(false);
     const [content, setContent] = useState(''); // Thêm state để lưu trữ nội dung trang web
     const [isTracing, setIsTracing] = useState(false);
@@ -61,10 +63,15 @@ const SearchComponentSrape = () => {
         setSelectedId(id); // Lưu trữ ID đã chọn
     }
     const handleTraceClick = () => {
+        //console.log("handleTraceClick id:", selectedId);
+        //console.log("handleTraceClick setResultOutArray:", setResultOutArray);
         if (selectedId !== null) {
             setIsTracing(true); // Set tracing state to true
             // Call the handleScrapeContent function passing the selected ID
-            handleScrapeContent(selectedId)
+            //handleScrapeContent(selectedId)
+            // eslint-disable-next-line no-undef
+            handleScrapeContent(selectedId, setResultOutArray)
+
                 .then(() => setIsTracing(false)) // Set tracing state to false after completion
                 .catch(error => {
                     console.error('Error:', error);
