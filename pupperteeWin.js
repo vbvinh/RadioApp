@@ -134,35 +134,29 @@ const crawlData = async (ctx) => {
                     resolve([selectedId,listenXPath1, listenXPath2, listenXPath3]);
                 });
 
-                const [selectedId,listenXPath1, listenXPath2, listenXPath3] = listenXPathData;
-                await page.waitForXPath(listenXPath1);
-                await page.waitForXPath(listenXPath2);
-                await page.waitForXPath(listenXPath3);
-                
-                const [valueXpath1] = await page.$x(listenXPath1);
-                const [valueXpath2] = await page.$x(listenXPath2);
-                const [valueXpath3] = await page.$x(listenXPath3);
+                const [selectedId, listenXPath1, listenXPath2, listenXPath3] = listenXPathData;
 
-                if (valueXpath1 && valueXpath2 && valueXpath3) {
-                    //let resultOutId;
-                    let resultOut1 = await page.evaluate(el => el.textContent, valueXpath1);
-                    let resultOut2 = await page.evaluate(el => el.textContent, valueXpath2);
-                    let resultOut3 = await page.evaluate(el => el.textContent, valueXpath3);
-                    console.log('resultOut: ',selectedId, resultOut1, resultOut2, resultOut3);
-                    const responseData = {
-                        resultScrape: [ resultOut1, resultOut2, resultOut3], // Return an array of resultOut
-                        //resultScrape: [selectedId, resultOut1, resultOut2, resultOut3],
-                    };
-                    ctx.body = responseData;
-                } else {
-                    ctx.status = 404;
-                    ctx.body = {
-                        error: 'Element not found with the given XPath',
-                    };
-                    isFirstRequest = true;
-                    await browser.close();
-                    return;
-                }
+                const timeout = 20000; // Thời gian chờ đợi tối đa trong miliseconds
+                const valueXpath1Promise = page.waitForXPath(listenXPath1, { timeout }).then(el => el).catch(() => null);
+                const valueXpath2Promise = page.waitForXPath(listenXPath2, { timeout }).then(el => el).catch(() => null);
+                const valueXpath3Promise = page.waitForXPath(listenXPath3, { timeout }).then(el => el).catch(() => null);
+                          
+                const [valueXpath1, valueXpath2, valueXpath3] = await Promise.all([valueXpath1Promise, valueXpath2Promise, valueXpath3Promise]);
+
+                let resultOut1 = null;
+                let resultOut2 = null;
+                let resultOut3 = null;
+
+                if (valueXpath1) {resultOut1 = await page.evaluate(el => el.textContent, valueXpath1);}
+                if (valueXpath2) {resultOut2 = await page.evaluate(el => el.textContent, valueXpath2);}
+                if (valueXpath3) {resultOut3 = await page.evaluate(el => el.textContent, valueXpath3);}
+                
+                console.log('resultOut: ',selectedId, resultOut1, resultOut2, resultOut3);
+                const responseData = {
+                    resultScrape: [ resultOut1, resultOut2, resultOut3], // Return an array of resultOut
+                    //resultScrape: [selectedId, resultOut1, resultOut2, resultOut3],
+                };
+                ctx.body = responseData;           
             } catch (error) {
                 console.error('Error:', error);
                 isFirstRequest = true;
