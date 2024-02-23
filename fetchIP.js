@@ -46,7 +46,7 @@ const SearchComponentIP = () => {
                 handleItemClick(target.textContent);
             }
         });
-    }, [selectedRadio]); // Thêm searchValue vào mảng dependency để useEffect chạy mỗi khi searchValue thay đổi
+    }, [pageNumber, selectedRadio]); // Thêm searchValue vào mảng dependency để useEffect chạy mỗi khi searchValue thay đổi
 
     console.log(selectedRadio);
 
@@ -118,7 +118,7 @@ const SearchComponentIP = () => {
         } else if (selectedRadio === 'BLU-NSN') {
             return 'http://localhost:1337/api/blu-nsns/1';
         } else if (selectedRadio === 'CTO-ERI') {
-            return 'http://localhost:1337/api/xpath-names';
+            return 'http://localhost:1337/api/xpath-names/1';
         } else {
             // Xử lý tùy chọn khác nếu cần
             return '';
@@ -143,21 +143,19 @@ const SearchComponentIP = () => {
         }
     }
 
-    function displayDataPerPage() {
-        if (displayedData.length === 0) {
-            return null; // Hoặc bạn có thể trả về một thông báo nếu data chưa được lấy
-        }
-
-        return displayedData
-            .slice(pagesVisited, pagesVisited + nodesPerPage)
-            .map((node, index) => {
-                const { name, ip } = node;
-                const key = `node_${index}`;
-                return <li key={key}>{name}: {ip}</li>;
-            });
+    const displayDataPerPage = () => {
+        const startIndex = pageNumber * nodesPerPage;
+        const endIndex = startIndex + nodesPerPage;
+        const slicedData = data.slice(startIndex, endIndex);
+        return slicedData.map((node, index) => {
+            const { name, ip } = node;
+            const key = `node_${index}`;
+            return <li key={key}>{name}: {ip}</li>;
+        });
     }
 
     const handlePageChange = ({ selected }) => {
+        console.log('Selected: ', selected)
         setPageNumber(selected);
     };
 
@@ -210,6 +208,7 @@ const SearchComponentIP = () => {
                 containerClassName={'pagination'}
                 activeClassName={'active'}
             />
+
 
             {/* <button onClick={handleLoginContent} disabled={isLoading} className="connect-button">
                 {isLoading ? 'Connecting...' : buttonState}
