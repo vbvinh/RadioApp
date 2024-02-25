@@ -1,0 +1,198 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #000;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+}
+
+/* Nav */
+.custom-nav .collapse {
+  justify-content: flex-end;
+}
+
+/* End Nav */
+
+/* Home */
+.home {
+  margin-top: 30px;
+}
+
+.home>h2 {
+  margin-bottom: 20px;
+}
+
+.home .category {
+  margin-bottom: 20px;
+}
+
+.home .category-title {
+  margin: 10px 0;
+}
+
+/* End home */
+
+/* Login */
+.login {
+  min-height: 100vh;
+  align-items: center;
+}
+
+.login h6 {
+  margin-top: 15px;
+}
+
+/* End Login */
+
+/* Register */
+.register {
+  min-height: 100vh;
+  align-items: center;
+}
+
+/* End register */
+
+/* More CSS */
+.customInput {
+  width: 100%;
+  padding: 4px;
+}
+
+
+button {
+  padding: 5px 10px;
+  /* Tùy chỉnh khoảng cách và kích thước nút button */
+  border: none;
+  /* Loại bỏ đường viền của nút button */
+  border-radius: 5px;
+  /* Tạo góc cong cho nút button */
+  cursor: pointer;
+  /* Biến con trỏ thành dấu nhấp chuột khi di chuột qua nút button */
+}
+
+.connect-button {
+  background-color: green;
+  /* Màu xanh cho nút Connect */
+  color: white;
+  /* Màu chữ trắng */
+}
+
+.disconnect-button {
+  background-color: gray;
+  /* Màu đỏ cho nút Disconnect */
+  color: white;
+  /* Màu chữ trắng */
+}
+
+button {
+  padding: 5px 10px;
+  /* Tùy chỉnh khoảng cách và kích thước nút button */
+  border: none;
+  /* Loại bỏ đường viền của nút button */
+  border-radius: 5px;
+  /* Tạo góc cong cho nút button */
+  cursor: pointer;
+  /* Biến con trỏ thành dấu nhấp chuột khi di chuột qua nút button */
+}
+
+.trace-button {
+  background-color: #007bff;
+  /* Màu xanh lam cho nút Trace */
+  color: white;
+  /* Màu chữ trắng */
+}
+
+button:disabled {
+  opacity: 0.5;
+  /* Làm mờ nút khi nó bị tắt */
+}
+
+
+.pagination {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+}
+
+.pagination li {
+  margin: 0 7px;
+  cursor: pointer;
+}
+
+.pagination .active {
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+
+.radio-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  /* Khoảng cách giữa radio buttons và các phần tử khác */
+}
+
+.radio-container label {
+  position: relative;
+  margin-right: 10px;
+  /* Khoảng cách giữa các radio button */
+}
+
+.radio-container label::before {
+  content: '';
+  display: inline-block;
+  width: 15px;
+  /* Kích thước của radio button */
+  height: 15px;
+  margin-right: 10px;
+  /* Khoảng cách giữa radio button và văn bản */
+  border: 0px solid #333;
+  /* Viền của radio button */
+  border-radius: 50%;
+  /* Để tạo hình tròn */
+}
+
+.radio-container input[type="radio"] {
+  position: none;
+  /* opacity:0; */
+  /* Ẩn radio button gốc */
+  cursor: pointer;
+}
+
+.radio-container input[type="radio"]:checked+label::before {
+  background-color: #007bff;
+  /* Màu nền khi radio button được chọn */
+}
+
+/* Hiệu ứng khi hover vào radio button */
+.radio-container label:hover::before {
+  border-color: #666;
+}
+
+.containerSub {
+  display: flex;
+  justify-content: center;
+  /* Căn giữa theo chiều ngang */
+  align-items: center;
+  /* Căn giữa theo chiều dọc */
+  height: 5vh;
+  /* Đảm bảo container chiếm 5vh chiều cao của trang */
+}
+
+h4,
+.content {
+  margin: 0;
+  /* Loại bỏ margin mặc định */
+  color: rgb(242, 8, 8);
+  /* Màu chữ */
+  font-size: 20px;
+  /* Kích thước chữ */
+}
