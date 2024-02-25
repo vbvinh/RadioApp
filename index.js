@@ -1,15 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import Container from 'react-bootstrap/container';
 import SearchComponentSrape from "../Fetch/fetchScrape.js";
 import SearchComponentIP from "../Fetch/fetchIP.js";
+import AppRenderTable from "../Scrape/RenderTable.js";
+import { useNavigate } from 'react-router-dom'; // Import để điều hướng người dùng
+//import { ScrapeResultTable } from "../Scrape/Scraping.js"; // Import handleScrapeContent
+import { isAuthenticated } from "../../helpers"; // Thay đổi import từ 'userData' sang 'isAuthenticated'
+
 import { userData } from "../../helpers";
 
 const Home = () => {
-  const { username } = userData();
+  const { username } = userData(); // Sử dụng isAuthenticated thay vì userData
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const navigate = useNavigate(); // Initialize useNavigate hook
+
+  useEffect(() => {
+    if (!isAuthenticated()) { // Sử dụng isAuthenticated thay vì isLoggedIn
+      navigate('/login'); 
+    }
+  }, [navigate]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
+
 
   return (
     <div className={`d-flex ${isSidebarOpen ? 'toggled' : ''}`} id="wrapper">
@@ -51,8 +65,11 @@ const Home = () => {
 
         <div className="container-fluid">
           <div className="row">
+            {/* <Container> */}
             <SearchComponentIP />
-            <SearchComponentSrape />
+            {/* <SearchComponentSrape /> */}
+            <AppRenderTable />
+            {/* </Container> */}
           </div>
         </div>
       </div>
