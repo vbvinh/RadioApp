@@ -13,7 +13,7 @@ const SearchComponentIP = () => {
     //const navigate = useNavigate();
     const [pageNumber, setPageNumber] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
-    const nodesPerPage = 10; // Số lượng node trên mỗi trang
+    const nodesPerPage = 5; // Số lượng node trên mỗi trang
     const [data, setData] = useState([]); // Thêm state để lưu trữ dữ liệu từ API
     const pagesVisited = pageNumber * nodesPerPage;
     //const pagesVisited = Math.min(pageNumber * nodesPerPage, data.length - 1);
@@ -223,7 +223,11 @@ const SearchComponentIP = () => {
             </button> */}
 
             {/* Hiển thị nội dung trang web */}
-            <div dangerouslySetInnerHTML={{ __html: content }}></div>
+            <div className="containerSub">
+                <h4>Connected to: </h4>
+                <div className="content" dangerouslySetInnerHTML={{ __html: content }}></div>
+            </div>
+
 
             {/* <ul id="userListIP"></ul> */}
         </div>
