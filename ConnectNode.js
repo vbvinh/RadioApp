@@ -1,145 +1,59 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-//import handleLoginWithIP from "../Scrape/ConnectNode.js";
-import { handleLoginWithIP, handleLogin } from '../Scrape/ConnectNode.js';
 
+const handleLoginWithIP = async (searchValue, setIsLoading) => {
+  setIsLoading(true); // Bắt đầu quá trình kết nối
 
+  try {
+    const regex = /\b192(?:\.\d{1,3}){3}\b/g;
+    const matches = searchValue.match(regex);
 
-const SearchComponentIP = () => {
-    const [searchValue, setSearchValue] = useState('');
-    const [content, setContent] = useState(''); // Thêm state để lưu trữ nội dung trang web
-    const [isLoading, setIsLoading] = useState(false); // Thêm state để xác định trạng thái của quá trình kết nối
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        // Thiết lập giá trị mặc định khi component được tạo ra
-        setSearchValue('Nokia');
-    }, []); // Mảng truyền vào useEffect để đảm bảo chỉ chạy một lần khi component được tạo ra
-
-
-    useEffect(() => {
-        fetchDataAndDisplay();
-
-        document.getElementById('searchInput').addEventListener('input', function () {
-            filterAndDisplay(this.value);
-        });
-
-        document.getElementById('userListIP').addEventListener('click', function (event) {
-            const target = event.target;
-            if (target.tagName === 'LI') {
-                handleItemClick(target.textContent);
-            }
-        });
-    }, [searchValue]); // Thêm searchValue vào mảng dependency để useEffect chạy mỗi khi searchValue thay đổi
-
-    console.log(searchValue);
-
-    function fetchDataAndDisplay() {
-        const apiUrl = getApiUrl(); // Lấy URL dựa vào radio button được chọn
-        fetch(apiUrl)
-            .then(res => res.json())
-            .then(({ data }) => {
-                console.log('API data', data);
-                displayData(data);
-            })
-            .catch(error => console.error(error));
+    // Lấy kết quả IP
+    const IP = matches ? matches[0] : null;
+    if (IP) {
+      const result = await handleLogin(IP);
+      setIsLoading(false); // Kết thúc quá trình kết nối thành công
+      return result;
+    } else {
+      setIsLoading(false); // Kết thúc quá trình kết nối với trạng thái lỗi
+      return null;
     }
-
-    function displayData(data) {
-        const userList = document.querySelector('#userListIP');
-        userList.innerHTML = ''; // Clear previous content
-
-        data.forEach(({ attributes }) => {
-            const markup = `<li>${attributes.NodeName}:${attributes.IPaddress}</li>`;
-            userList.insertAdjacentHTML('beforeend', markup);
-        });
-    }
-
-    function filterAndDisplay(searchValue) {
-        const apiUrl = getApiUrl(); // Lấy URL dựa vào radio button được chọn
-        fetch(apiUrl)
-            .then(res => res.json())
-            .then(({ data }) => {
-                const filteredData = data.filter(({ attributes }) => attributes.NodeName.includes(searchValue));
-                displayData(filteredData);
-            })
-            .catch(error => console.error(error));
-    }
-
-    function handleItemClick(selectedValue) {
-        setSearchValue(selectedValue);
-    }
-
-    function getApiUrl() {
-        // Tùy thuộc vào radio button được chọn, trả về URL tương ứng
-        if (searchValue === 'Nokia') {
-            return 'http://localhost:1337/api/ypathnames';
-        } else if (searchValue === 'Ericsson') {
-            return 'http://localhost:1337/api/xpath-names';
-        } else {
-            // Xử lý tùy chọn khác nếu cần
-            return '';
-        }
-    }
-
-    // Call handleScrape and update content state
-    async function handleLoginContent() {
-        try {
-            // Bắt đầu quá trình kết nối bằng cách đặt isLoading thành true
-            setIsLoading(true);
-            const LoginContent = await handleLoginWithIP(searchValue, setIsLoading, setContent);
-            setContent(LoginContent);
-        } catch (error) {
-            console.error(error);
-        } finally {
-            // Kết thúc quá trình kết nối bằng cách đặt isLoading thành false
-            setIsLoading(false);
-        }
-    }
-
-    return (
-        <div>
-            <h3 className="fs-4 mb-3">Nhập IP</h3>
-            <label>
-                <input
-                    type="radio"
-                    value="Nokia"
-                    checked={searchValue === 'Nokia'}
-                    onChange={() => setSearchValue('Nokia')}
-                />
-                Nokia
-            </label>
-            <label>
-                <input
-                    type="radio"
-                    value="Ericsson"
-                    checked={searchValue === 'Ericsson'}
-                    onChange={() => setSearchValue('Ericsson')}
-                />
-                Ericsson
-            </label>
-            {/* Radio button 3 nếu cần */}
-
-            <input
-                type="text"
-                id="searchInput"
-                placeholder="Nhập IP cần tìm"
-                value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
-                className="customInput"
-            />
-
-            <button onClick={handleLoginContent} disabled={isLoading}>
-                {isLoading ? 'Connecting...' : 'Connect'}
-            </button>
-            {/* Hiển thị nội dung trang web */}
-            <div dangerouslySetInnerHTML={{ __html: content }}></div>
-
-            <ul id="userListIP"></ul>
-        </div>
-    );
+  } catch (error) {
+    console.error(error);
+    setIsLoading(false); // Kết thúc quá trình kết nối với trạng thái lỗi
+    return null;
+  }
 };
 
-export default SearchComponentIP;
 
+const handleLogin = async (IP) => {
+  try {
+    // Gọi API với phương thức POST và lấy dữ liệu từ server
+    const response = await fetch('http://localhost:1337/api/crawl-data', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        // Các headers khác nếu cần thiết
+      },
+      body: JSON.stringify({
+        searchValue: IP,
+        // Thêm các thông tin khác vào body nếu cần
+      }),
+    });
 
+    // Kiểm tra trạng thái của response
+    if (response.ok) {
+      // Lấy nội dung của response và chuyển đổi sang JSON
+      const data = await response.json();
+      // Trích xuất pageTitle từ dữ liệu JSON nhận được
+      const pageTitle = data.pageTitle;
+      return pageTitle;
+    } else {
+      console.error('API request failed');
+      return null;
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    return null;
+  }
+};
+
+export { handleLoginWithIP, handleLogin };
