@@ -3,12 +3,12 @@ import { ScrapeResultTable, handleScrapeContent } from '../Scrape/Scraping.js';
 //import { ScrapeResultTable } from '../Scrape/Scraping.js';
 import Dropdown from 'react-bootstrap/Dropdown';
 import Form from 'react-bootstrap/Form';
- 
-const SearchComponentSrape = ({ setResultOutArray })  => {
-    const [searchValue, setSearchValue] = useState('');
+
+const SearchComponentSrape = ({ setResultOutArray }) => {
+    // const [searchValue, setSearchValue] = useState('');
     const [selectedId, setSelectedId] = useState(null); // State để lưu trữ ID đã chọn
     //const [resultOutArray, setResultOutArray] = useState(null); 
-    const [isDisconnect, setIsDisconnect] = useState(false);
+    // const [isDisconnect, setIsDisconnect] = useState(false);
     const [content, setContent] = useState(''); // Thêm state để lưu trữ nội dung trang web
     const [isTracing, setIsTracing] = useState(false);
     const [opacity, setOpacity] = useState(true);
@@ -29,10 +29,10 @@ const SearchComponentSrape = ({ setResultOutArray })  => {
         return idNameMapping[id] || "Will_define";
     };
 
-    const getIdFromName = (name) => {
-        const id = Object.keys(idNameMapping).find(key => idNameMapping[key] === name);
-        return id ? parseInt(id) : null;
-    };
+    // const getIdFromName = (name) => {
+    //     const id = Object.keys(idNameMapping).find(key => idNameMapping[key] === name);
+    //     return id ? parseInt(id) : null;
+    // };
 
     useEffect(() => {
         fetchDataAndDisplay();
@@ -48,16 +48,16 @@ const SearchComponentSrape = ({ setResultOutArray })  => {
             .catch(error => console.error(error));
     }
 
-    function displayData(data) {
-        const userList = document.querySelector('#userListScrape');
-        userList.innerHTML = ''; // Clear previous content
+    // function displayData(data) {
+    //     const userList = document.querySelector('#userListScrape');
+    //     userList.innerHTML = ''; // Clear previous content
 
-        data.forEach(item => {
-            const id = item.id;
-            const markup = `<li> ${item.name}</li>`; // Create markup for each item
-            userList.insertAdjacentHTML('beforeend', markup);
-        });
-    }
+    //     data.forEach(item => {
+    //         const id = item.id;
+    //         const markup = `<li> ${item.name}</li>`; // Create markup for each item
+    //         userList.insertAdjacentHTML('beforeend', markup);
+    //     });
+    // }
 
     function handleItemClick(id) {
         setSelectedId(id); // Lưu trữ ID đã chọn
