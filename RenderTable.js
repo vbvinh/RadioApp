@@ -33,6 +33,8 @@ const AppRenderTable = () => {
                 <thead>
                     <tr>
                         <th>Index</th>
+                        <th>Name</th>
+                        <th>Click</th>
                         <th>Result</th>
                     </tr>
                 </thead>
@@ -40,7 +42,9 @@ const AppRenderTable = () => {
                     {Array.isArray(resultOutArray) && resultOutArray.map((data, index) => (
                         <tr key={index}>
                             <td>{index + 1}</td>
-                            <td>{data}</td>
+                            <td>{data.name}</td>
+                            <td>{data.click}</td>
+                            <td>{data.result}</td>
                         </tr>
                     ))}
                 </tbody>
