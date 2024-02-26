@@ -214,7 +214,7 @@ const SearchComponentIP = () => {
                 {isLoading ? 'Connecting...' : buttonState}
             </button> */}
 
-            <button onClick={handleLoginContent} disabled={isLoading} class="connect-button">
+            <button onClick={handleLoginContent} disabled={isLoading} className="connect-button">
                 {isLoading ? 'Connecting...' : 'Connect/Disconnect'}
             </button>
 
