@@ -1,44 +1,3 @@
-// const handleScrape = async (searchValue) => {
-//     try {
-//         // Gọi API với phương thức POST
-//         const response = await fetch('http://localhost:1337/api/crawl-data', {
-//             method: 'POST',
-//             headers: {
-//                 'Content-Type': 'application/json',
-//                 // Các headers khác nếu cần thiết
-//             },
-//             body: JSON.stringify({
-//                 searchValue: searchValue,
-//                 // Thêm các thông tin khác vào body nếu cần
-//             }),
-//         });
-
-//         // Kiểm tra trạng thái của response
-//         if (response.ok) {
-//             // Lấy nội dung của response và chuyển đổi sang JSON
-//             const data = await response.json();
-//             console.log('Data received from server:', data); // In ra dữ liệu nhận được từ server
-//             console.log('Value of resultOut:', data.resultValue);
-
-//             // Trích xuất pageTitle từ dữ liệu JSON nhận được
-//             const resultOut = data.resultValue;
-
-//             // Xử lý dữ liệu hoặc hiển thị thông báo thành công
-//             const scrapeResultElement = document.getElementById('scrapeResult');
-//             scrapeResultElement.textContent = `Resule trace: ${resultOut}`;
-
-
-//             // Thực hiện các hành động khác với pageTitle nếu cần
-//         } else {
-//             // Xử lý lỗi hoặc hiển thị thông báo lỗi
-//             console.error('API request failed');
-//         }
-//     } catch (error) {
-//         // Xử lý lỗi nếu có
-//         console.error('Error:', error);
-//     }
-// };
-// export default handleScrape;
 
 async function fetchDataForSelectedId(id) {
     try {
@@ -50,7 +9,8 @@ async function fetchDataForSelectedId(id) {
         return null;
     }
 }
-const sendPathsToServer = async (id, path1, path2, path3) => {
+
+const sendPathsToServer = async (id, ...args) => {
     try {
         // Gửi ID và các đường dẫn XPath qua server
         const response = await fetch('http://localhost:1337/api/crawl-data', {
@@ -58,7 +18,7 @@ const sendPathsToServer = async (id, path1, path2, path3) => {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ id, path1, path2, path3 }), // Gửi ID và các đường dẫn XPath
+            body: JSON.stringify({ id, paths: args }), // Gửi ID và các đường dẫn XPath
         });
         console.log("Đã gửi ID và các đường dẫn XPath đến server thành công");
 
@@ -85,12 +45,24 @@ const handleScrapeContent = async (selectedId, setResultOutArray) => {
         console.log("handleScrapeContent id:", selectedId);
         if (selectedId !== null) {
             const selectedData = await fetchDataForSelectedId(selectedId);
+            console.log("handleScrapeContent selectedData:", selectedData);
             if (selectedData !== null) {
-                const { listenXPath1, listenXPath2, listenXPath3 } = selectedData.attributes.path;
-                // Gửi ID và các đường dẫn XPath qua server
-                const resultOutArray = await sendPathsToServer(selectedId, listenXPath1, listenXPath2, listenXPath3);
-                console.log("Result out resultOutArray array in handleScrapeContent:", resultOutArray);
-                setResultOutArray(resultOutArray); // Gọi setResultOutArray để cập nhật resultOutArray
+                // Khởi tạo mảng resultOutArray để chứa thông tin từ các selectedData
+                let resultOutArray = [];
+
+                // Truy cập vào thuộc tính path trong attributes
+                const paths = selectedData.attributes.path;
+
+                // Lặp qua các phần tử trong đối tượng paths và trích xuất thông tin
+                Object.values(paths).forEach(path => {
+                    const { name, clickXPath, resultXPath } = path;
+                    resultOutArray.push({ name, clickXPath, resultXPath });
+                });
+
+                // Gửi resultOutArray qua server
+                const response = await sendPathsToServer(selectedId, ...resultOutArray);
+                console.log("Result out resultOutArray array in handleScrapeContent:", response);
+                setResultOutArray(response); // Gọi setResultOutArray để cập nhật resultOutArray
             } else {
                 console.error("handleScrapeContent Không thể tìm thấy dữ liệu cho ID đã chọn");
             }
@@ -101,8 +73,7 @@ const handleScrapeContent = async (selectedId, setResultOutArray) => {
         console.error('Error:', error);
     }
 };
+
+
+
 export { fetchDataForSelectedId, handleScrapeContent, sendPathsToServer };
-
-
-
-
