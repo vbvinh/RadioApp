@@ -59,8 +59,8 @@ const handleScrapeContent = async (selectedId, setResultOutArray) => {
 
                // Lặp qua các phần tử trong đối tượng paths và trích xuất thông tin
                Object.values(paths).forEach(path => { 
-                const { name, clickXPath, resultXPath } = path;
-                resultOutArray.push({ name, clickXPath, resultXPath });
+                const { name, click, result } = path;
+                resultOutArray.push({ name, click, result });
             });
                 // Gửi resultOutArray qua server
                 const response = await sendPathsToServer(selectedId, ...resultOutArray);
