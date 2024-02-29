@@ -7,7 +7,8 @@ import SearchComponentSrape from '../Fetch/fetchScrape.js'; // Import SearchComp
 const AppRenderTable = () => {
     const [selectedId, setSelectedId] = useState(null);
     const [resultOutArray, setResultOutArray] = useState([]);
-    //console.log('ScrapeResultTable component is being rendered before useEffect');
+    const [firstRowBold, setFirstRowBold] = useState(true); // Biến trạng thái để in đậm hàng đầu tiên
+
     useEffect(() => {
         console.log('ScrapeResultTable component is being rendered after useEffect');
         const fetchDataAndSetResult = async () => {
@@ -30,18 +31,18 @@ const AppRenderTable = () => {
             <SearchComponentSrape setResultOutArray={setResultOutArray} />
             <h3>Scrape Result</h3>
             <Table striped bordered hover>
-                <thead>
+                {/* <thead>
                     <tr>
                         <th>Index</th>
                         <th>Name</th>
-                        <th>Click</th>
-                        <th>Result</th>
+                        <th>Value 1</th>
+                        <th>Value 2</th>
                     </tr>
-                </thead>
-                <tbody>
+                </thead> */}
+              <tbody>
                     {Array.isArray(resultOutArray) && resultOutArray.map((data, index) => (
-                        <tr key={index}>
-                            <td>{index + 1}</td>
+                        <tr key={index} style={{ fontWeight: firstRowBold && index === 0 ? 'bold' : 'normal' }}>
+                            <td>{index === 0 ? 'Index' : index}</td>
                             <td>{data.name}</td>
                             <td>{data.click}</td>
                             <td>{data.result}</td>
