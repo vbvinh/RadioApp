@@ -13,7 +13,7 @@ let page; // Biến global để lưu trữ trang web
 let isFirstRequest = true; // Biến cờ để kiểm tra xem yêu cầu là lần đầu tiên hay không
 
 // Hàm xử lý scrape dữ liệu cho id lẻ
-async function scrapeOdd(name, clickXPath, resultXPath, index) {
+async function scrapeOdd(name, click, result, index) {
     try {
         // Thực hiện scrape data cho trường hợp id là số le
         if (index > 0) {
@@ -24,25 +24,25 @@ async function scrapeOdd(name, clickXPath, resultXPath, index) {
             new Promise(resolve => setTimeout(resolve, 10000)) // Timeout sau 10 giây
         ]);
         await Promise.race([
-            page.waitForXPath(clickXPath),
+            page.waitForXPath(click),
             new Promise(resolve => setTimeout(resolve, 10000)) // Timeout sau 10 giây
         ]);
 
         //Lấy các phần tử XPath
         const [nameElement] = await page.$x(name);
-        const [clickElement] = await page.$x(clickXPath);
+        const [clickElement] = await page.$x(click);
 
         const nameText = nameElement ? await page.evaluate(el => el.textContent, nameElement) : null;
         const clickText = clickElement ? await page.evaluate(el => el.textContent, clickElement) : null;
         if (clickElement) await clickElement.click();
-        console.log('click: ', index + 1);
+        console.log('click: ', index);
 
         // Click vào phần tử clickXPath
         await Promise.race([
-            page.waitForXPath(resultXPath),
+            page.waitForXPath(result),
             new Promise(resolve => setTimeout(resolve, 10000)) // Timeout sau 10 giây
         ]);
-        const [resultElement] = await page.$x(resultXPath);
+        const [resultElement] = await page.$x(result);
 
         const resultText = resultElement ? await page.evaluate(el => el.textContent, resultElement) : null;
         return { name: nameText, click: clickText, result: resultText };
@@ -53,13 +53,13 @@ async function scrapeOdd(name, clickXPath, resultXPath, index) {
 }
 
 // Hàm xử lý scrape dữ liệu cho id chẵn
-async function scrapeEven(name, clickXPath, resultXPath, index) {
+async function scrapeEven(name, click, result, index) {
     try {
         // Chờ các phần tử XPath hoặc timeout
         const [nameElement, clickElement, resultElement] = await Promise.all([
             Promise.race([page.waitForXPath(name), new Promise(resolve => setTimeout(resolve, 5000))]),
-            Promise.race([page.waitForXPath(clickXPath), new Promise(resolve => setTimeout(resolve, 5000))]),
-            Promise.race([page.waitForXPath(resultXPath), new Promise(resolve => setTimeout(resolve, 5000))])
+            Promise.race([page.waitForXPath(click), new Promise(resolve => setTimeout(resolve, 5000))]),
+            Promise.race([page.waitForXPath(result), new Promise(resolve => setTimeout(resolve, 5000))])
         ]);
 
         // Kiểm tra xem các phần tử đã được tìm thấy thành công hay không
@@ -71,7 +71,7 @@ async function scrapeEven(name, clickXPath, resultXPath, index) {
         const nameText = nameElement ? await page.evaluate(el => el.textContent, nameElement) : null;
         const clickText = clickElement ? await page.evaluate(el => el.textContent, clickElement) : null;
         const resultText = resultElement ? await page.evaluate(el => el.textContent, resultElement) : null;
-        console.log('index+1: ', index + 1);
+        console.log('index: ', index);
         return { name: nameText, click: clickText, result: resultText };
     } catch (error) {
         console.error('Error occurred during scraping:', error);
@@ -85,7 +85,7 @@ async function scrapeEven(name, clickXPath, resultXPath, index) {
 const scrapeBasedOnId = async (id, paths) => {
     const scrapeFunction = id % 2 === 0 ? scrapeEven : scrapeOdd;
     try {
-        const scrapedData = await Promise.all(paths.map((path, index) => scrapeFunction(path.name, path.clickXPath, path.resultXPath, index)));
+        const scrapedData = await Promise.all(paths.map((path, index) => scrapeFunction(path.name, path.click, path.result, index)));
         return scrapedData;
     } catch (error) {
         console.error('Error occurred during scraping:', error);
