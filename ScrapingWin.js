@@ -12,13 +12,15 @@ async function fetchDataForSelectedId(id) {
 
 const sendPathsToServer = async (id, ...args) => {
     try {
+        // Lấy phần tử đầu tiên đã bị loại bỏ bằng slice(1)
+        const firstPath = args[0];
         // Gửi ID và các đường dẫn XPath qua server
         const response = await fetch('http://localhost:1337/api/crawl-data', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ id, paths: args }), // Gửi ID và các đường dẫn XPath
+            body: JSON.stringify({ id, paths: args.slice(1) }), // Gửi ID và các đường dẫn XPath
         });
         console.log("Đã gửi ID và các đường dẫn XPath đến server thành công");
 
@@ -27,6 +29,8 @@ const sendPathsToServer = async (id, ...args) => {
             const resultOutArray = data.resultScrape;
             // const scrapeResultElement = document.getElementById('scrapeResult');
             // scrapeResultElement.textContent = `Result out array: ${resultOutArray}`;
+            resultOutArray.unshift(firstPath);
+            console.log("Result out resultOutArray array in sendPathsToServer:", resultOutArray);    
             return resultOutArray;
             // setIsTracing(false);
         } else {
@@ -53,12 +57,11 @@ const handleScrapeContent = async (selectedId, setResultOutArray) => {
                 // Truy cập vào thuộc tính path trong attributes
                 const paths = selectedData.attributes.path;
 
-                // Lặp qua các phần tử trong đối tượng paths và trích xuất thông tin
-                Object.values(paths).forEach(path => {
-                    const { name, clickXPath, resultXPath } = path;
-                    resultOutArray.push({ name, clickXPath, resultXPath });
-                });
-
+               // Lặp qua các phần tử trong đối tượng paths và trích xuất thông tin
+               Object.values(paths).forEach(path => { 
+                const { name, clickXPath, resultXPath } = path;
+                resultOutArray.push({ name, clickXPath, resultXPath });
+            });
                 // Gửi resultOutArray qua server
                 const response = await sendPathsToServer(selectedId, ...resultOutArray);
                 console.log("Result out resultOutArray array in handleScrapeContent:", response);
