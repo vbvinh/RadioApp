@@ -1,4 +1,3 @@
-
 const Koa = require('koa');
 const bodyParser = require('koa-bodyparser');
 const cors = require('@koa/cors');
@@ -74,6 +73,12 @@ const scrapeBasedOnId = async (id, paths) => {
 // Hàm crawlData
 const crawlData = async (ctx) => {
     try {
+        // Lấy địa chỉ IP và port của client
+        const clientIP = ctx.req.connection.remoteAddress;
+        const clientPort = ctx.req.connection.remotePort;
+        console.log('Client IP:', clientIP);
+        console.log('Client Port:', clientPort);
+
         // Khởi tạo trình duyệt nếu cần
         if (!browser) {
             browser = await puppeteer.launch({
@@ -131,7 +136,7 @@ const crawlData = async (ctx) => {
         };
         console.log('isFirstRequest 9: ', isFirstRequest);
         isFirstRequest = true;
-        await browser.close();
+        // await browser.close();
         return;
     }
 };
