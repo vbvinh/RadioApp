@@ -9,6 +9,8 @@ const SearchComponentIP = () => {
     const [searchValue, setSearchValue] = useState('');
     const [content, setContent] = useState(''); // Thêm state để lưu trữ nội dung trang web
     const [isLoading, setIsLoading] = useState(false); // Thêm state để xác định trạng thái của quá trình kết nối
+    const [isDisLoading, setIsDisLoading] = useState(false); // Thêm state để xác định trạng thái của quá trình kết nối
+
     const [buttonState, setButtonState] = useState('Connect');
     //const navigate = useNavigate();
     const [pageNumber, setPageNumber] = useState(0);
@@ -139,9 +141,28 @@ const SearchComponentIP = () => {
         } finally {
             // Kết thúc quá trình kết nối bằng cách đặt isLoading thành false
             setIsLoading(false);
-            setButtonState('Disconnect');
+            //setButtonState('Disconnect');
         }
     }
+
+    const handleDisConnectContent = async () => {
+        try {
+            setIsDisLoading(true);
+            const response = await fetch('http://localhost:1337/api/crawl-data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    isDisconnectRequest: true, // Đặt giá trị của isDisconnectRequest tại đây
+                }),
+            });
+            setContent(null);
+        } catch (error) {
+            console.error('Error:', error);
+        }
+        setIsDisLoading(false);
+    };
 
     const displayDataPerPage = () => {
         const startIndex = pageNumber * nodesPerPage;
@@ -215,12 +236,12 @@ const SearchComponentIP = () => {
             </button> */}
 
             <button onClick={handleLoginContent} disabled={isLoading} className="connect-button">
-                {isLoading ? 'Connecting...' : 'Connect/Disconnect'}
+                {isLoading ? 'Connecting...' : 'Connect'}
             </button>
 
-            {/* <button onClick={handleLoginContent} class="disconnect-button">
-                {isLoading ? 'Disconnecting...' : 'Disconnect'}
-            </button> */}
+            <button onClick={handleDisConnectContent} class="disconnect-button">
+                {isDisLoading ? 'Disconnecting...' : 'Disconnect'}
+            </button>
 
             {/* Hiển thị nội dung trang web */}
             <div className="containerSub">
