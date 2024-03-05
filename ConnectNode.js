@@ -35,11 +35,10 @@ const handleLogin = async (IP) => {
       },
       body: JSON.stringify({
         searchValue: IP,
-        // Thêm các thông tin khác vào body nếu cần
+        isDisconnectRequest: false, // Đặt giá trị của isDisconnectRequest tại đây
       }),
     });
-
-    // Kiểm tra trạng thái của response
+    // Kiểm tra trạng thái của response 
     if (response.ok) {
       // Lấy nội dung của response và chuyển đổi sang JSON
       const data = await response.json();
@@ -55,5 +54,8 @@ const handleLogin = async (IP) => {
     return null;
   }
 };
+
+
+
 
 export { handleLoginWithIP, handleLogin };
