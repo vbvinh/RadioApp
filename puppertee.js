@@ -74,10 +74,12 @@ const scrapeBasedOnId = async (id, paths) => {
 const crawlData = async (ctx) => {
     try {
         // Lấy địa chỉ IP và port của client
-        const clientIP = ctx.req.connection.remoteAddress;
-        const clientPort = ctx.req.connection.remotePort;
-        console.log('Client IP:', clientIP);
-        console.log('Client Port:', clientPort);
+        // const clientIP = ctx.req.connection.remoteAddress;
+        // const clientPort = ctx.req.connection.remotePort;
+        // console.log('Client IP:', clientIP);
+        // console.log('Client Port:', clientPort);
+
+        const { isDisconnectRequest } = ctx.request.body;
 
         // Khởi tạo trình duyệt nếu cần
         if (!browser) {
@@ -91,7 +93,7 @@ const crawlData = async (ctx) => {
             page = await browser.newPage();
         }
         // Xử lý yêu cầu đầu tiên
-        if (isFirstRequest) {
+        if (isFirstRequest && !isDisconnectRequest) {
             //const page = await browser.newPage();
             const searchValue = ctx.request.body.searchValue; // Lấy giá trị từ body của request
             console.log('isFirstRequest 1: ', isFirstRequest);
@@ -102,8 +104,6 @@ const crawlData = async (ctx) => {
 
             //await page.goto(`https://${searchValue}`);
 
-            //console.log('IP server 2: ', searchValue);
-            //const xpathTile = '/html/body/section[2]/nav/ul/li[5]/a';
             const xpathTile = '/html/body/section[1]/aside/div[1]/ul/li[2]/label/h3/a';
 
             // Send a JSON response using ctx.send
@@ -115,19 +115,39 @@ const crawlData = async (ctx) => {
                 pageTitle: subTitle,
             };
             ctx.body = responseData;
+            //isFirstRequest = false;
         }
         //scraping   
         console.log('isFirstRequest 5: ', isFirstRequest);
-        if (!isFirstRequest) {
-            const { id, paths } = ctx.request.body; // Lấy id và các đường dẫn XPath từ body của request
-            if (!paths || paths.length === 0) {
-                throw new Error('Paths array is empty or undefined.');
+        console.log('isDisconnectRequest: ', isDisconnectRequest);
+        if (!isFirstRequest || isDisconnectRequest) {
+            console.log('isDisconnectRequest 1: ', isDisconnectRequest);
+            // Reset trạng thái sau khi hoàn thành yêu cầu
+            if (isDisconnectRequest) {
+                // Đóng trình duyệt nếu đã mở
+                if (browser) {
+                    await browser.close();
+                    browser = null;
+                }
+                // Thiết lập lại biến global và cờ
+                page = null;
+                isFirstRequest = true;
+                console.log('page: ', page);
+                console.log('browser: ', browser);
+                console.log('isFirstRequest: ', isFirstRequest);
+                return;
+            } else {
+                const { id, paths } = ctx.request.body; // Lấy id và các đường dẫn XPath từ body của request
+                if (!paths || paths.length === 0) {
+                    throw new Error('Paths array is empty or undefined.');
+                }
+                const resultScrape = await scrapeBasedOnId(id, paths);
+                ctx.body = { resultScrape };
+                console.log('isFirstRequest 7: ', isFirstRequest);
+                //isFirstRequest = false; // Đặt cờ thành false sau lần gọi đầu tiên
             }
-            const resultScrape = await scrapeBasedOnId(id, paths);
-            ctx.body = { resultScrape };
         }
-        console.log('isFirstRequest 7: ', isFirstRequest);
-        isFirstRequest = false; // Đặt cờ thành false sau lần gọi đầu tiên
+        isFirstRequest = false;
     } catch (error) {
         console.error('Error:', error);
         ctx.status = 500; // Set HTTP status code to 500
