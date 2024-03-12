@@ -8,12 +8,42 @@ app.use(bodyParser());
 app.use(cors());
 
 let browser; // Biến global để lưu trữ trình duyệt
+//let session; // Biến global để lưu trữ phiên làm việc
 let page; // Biến global để lưu trữ trang web
-let isFirstRequest = true; // Biến cờ để kiểm tra xem yêu cầu là lần đầu tiên hay không
-// Hàm xử lý scrape dữ liệu
-// async function scrapeData(name, clickXPath, resultXPath, index) {
-//     // Implement your scraping logic here   
-// }
+
+let sessionBrowsers = {};
+
+
+// Hàm để kiểm tra xem session đã mở trình duyệt chưa
+const isSessionBrowserOpen = (sessionId) => {
+    return !sessionBrowsers[sessionId];
+    //return true
+};
+
+// Hàm để mở trình duyệt dựa trên session ID
+const openSessionBrowser = async (sessionId) => {
+    if (!sessionBrowsers[sessionId]) {
+        sessionBrowsers[sessionId] = await puppeteer.launch({
+            headless: false,
+            ignoreHTTPSErrors: true,
+        });
+    }
+    return sessionBrowsers[sessionId];
+};
+// Hàm để xóa tất cả các phiên trình duyệt khỏi sessionBrowsers
+// const clearSessionBrowsers = () => {
+//     sessionBrowsers = {};
+// };
+
+// Hàm để đóng trình duyệt dựa trên session ID
+const closeSessionBrowser = async (sessionId) => {
+    if (sessionBrowsers[sessionId]) {
+        await sessionBrowsers[sessionId].close();
+        delete sessionBrowsers[sessionId];
+        sessionBrowsers = {};
+    }
+};
+
 
 // Hàm xử lý scrape dữ liệu cho id lẻ
 async function scrapeOdd(name, clickXPath, resultXPath, index) {
@@ -32,6 +62,7 @@ async function scrapeOdd(name, clickXPath, resultXPath, index) {
     const clickText = await page.evaluate(el => el.textContent, clickElement);
     await clickElement.click();
     console.log('click: ', index + 1);
+    await page.waitForTimeout(3000);
 
     // Click vào phần tử clickXPath
     await page.waitForXPath(resultXPath);
@@ -70,17 +101,30 @@ const scrapeBasedOnId = async (id, paths) => {
     return scrapedData;
 }
 
+let isFirstRequest = true; // Biến cờ để kiểm tra xem yêu cầu là lần đầu tiên hay không
 // Hàm crawlData
 const crawlData = async (ctx) => {
+    const { isDisconnectRequest, session } = ctx.request.body;
+    console.log('session 1: ', session);
     try {
         // Lấy địa chỉ IP và port của client
         // const clientIP = ctx.req.connection.remoteAddress;
         // const clientPort = ctx.req.connection.remotePort;
         // console.log('Client IP:', clientIP);
         // console.log('Client Port:', clientPort);
-
-        const { isDisconnectRequest } = ctx.request.body;
-
+        if (isDisconnectRequest) {
+            // Xử lý logic khi yêu cầu ngắt kết nối
+            if (browser) {
+                await browser.close();
+                browser = null;
+            }
+            page = null;
+            isFirstRequest = true;
+            console.log('page: ', page);
+            console.log('browser: ', browser);
+            console.log('isFirstRequest: ', isFirstRequest);
+            return;
+        }
         // Khởi tạo trình duyệt nếu cần
         if (!browser) {
             browser = await puppeteer.launch({
@@ -92,8 +136,9 @@ const crawlData = async (ctx) => {
         if (!page) {
             page = await browser.newPage();
         }
+
         // Xử lý yêu cầu đầu tiên
-        if (isFirstRequest && !isDisconnectRequest) {
+        if (isFirstRequest) {
             //const page = await browser.newPage();
             const searchValue = ctx.request.body.searchValue; // Lấy giá trị từ body của request
             console.log('isFirstRequest 1: ', isFirstRequest);
@@ -116,37 +161,18 @@ const crawlData = async (ctx) => {
             };
             ctx.body = responseData;
             //isFirstRequest = false;
-        }
-        //scraping   
-        console.log('isFirstRequest 5: ', isFirstRequest);
-        console.log('isDisconnectRequest: ', isDisconnectRequest);
-        if (!isFirstRequest || isDisconnectRequest) {
-            console.log('isDisconnectRequest 1: ', isDisconnectRequest);
-            // Reset trạng thái sau khi hoàn thành yêu cầu
-            if (isDisconnectRequest) {
-                // Đóng trình duyệt nếu đã mở
-                if (browser) {
-                    await browser.close();
-                    browser = null;
-                }
-                // Thiết lập lại biến global và cờ
-                page = null;
-                isFirstRequest = true;
-                console.log('page: ', page);
-                console.log('browser: ', browser);
-                console.log('isFirstRequest: ', isFirstRequest);
-                return;
-            } else {
-                const { id, paths } = ctx.request.body; // Lấy id và các đường dẫn XPath từ body của request
-                if (!paths || paths.length === 0) {
-                    throw new Error('Paths array is empty or undefined.');
-                }
-                const resultScrape = await scrapeBasedOnId(id, paths);
-                ctx.body = { resultScrape };
-                console.log('isFirstRequest 7: ', isFirstRequest);
-                //isFirstRequest = false; // Đặt cờ thành false sau lần gọi đầu tiên
+
+        } else {
+            const { id, paths } = ctx.request.body; // Lấy id và các đường dẫn XPath từ body của request
+            if (!paths || paths.length === 0) {
+                throw new Error('Paths array is empty or undefined.');
             }
+            const resultScrape = await scrapeBasedOnId(id, paths);
+            ctx.body = { resultScrape };
+            console.log('isFirstRequest 7: ', isFirstRequest);
+            //isFirstRequest = false; // Đặt cờ thành false sau lần gọi đầu tiên
         }
+
         isFirstRequest = false;
     } catch (error) {
         console.error('Error:', error);
@@ -160,7 +186,6 @@ const crawlData = async (ctx) => {
         return;
     }
 };
-
 module.exports = {
     crawlData
 };
